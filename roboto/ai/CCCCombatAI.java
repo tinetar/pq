@@ -31,14 +31,15 @@ public abstract class CCCCombatAI extends FFFFakePlayerAI {
     @Override
     public void thinkAndAct() {
         handleDeath();
-       
-                if (_ffffakePlayer.isGmSpawned() && _ffffakePlayer.isDead()) {
-                    _ffffakePlayer.setFakeDeathRespawn(true);
-                    ThreadPool.schedule(() -> _ffffakePlayer.doReviveAndTeleportIfFake(), 3000);
-                    return;
-                }
     }
+    
+    public void handleDeath() {
+        if (!_ffffakePlayer.isDead()) return;
 
+        _ffffakePlayer.setFakeDeathRespawn(true);
+        ThreadPool.schedule(() -> _ffffakePlayer.doReviveAndTeleportIfFake(), 3000);
+    }
+       
     protected void tryAttackingUsingMageOffensiveSkill() {
         if (_ffffakePlayer.getTarget() != null) {
             BBBBotSkill botSkill = getRandomAvailableMageSpellForTarget();

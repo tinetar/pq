@@ -39,8 +39,6 @@ public abstract class FFFFakePlayerAI
 	private long _moveToPawnTimeout;
 	protected int _clientMovingToPawnOffset;	
 	protected boolean _isBusyThinking = false;
-	protected int iterationsOnDeath = 0;
-	private final int toVillageIterationsOnDeath = 5;
 	
 	public FFFFakePlayerAI(FFFFakePlayer character)
 	{
@@ -81,18 +79,6 @@ public abstract class FFFFakePlayerAI
 	            e.printStackTrace();
 	        }
 	    }
-	}
-
-	protected void handleDeath() {
-		if(_ffffakePlayer.isDead()) {
-			if(iterationsOnDeath >= toVillageIterationsOnDeath) {
-				toVillageOnDeath();
-			}
-			iterationsOnDeath++;
-			return;
-		}
-		
-		iterationsOnDeath = 0;		
 	}
 	
 	public void setBusyThinking(boolean thinking) {
@@ -137,7 +123,6 @@ public abstract class FFFFakePlayerAI
 		    .filter(c -> _ffffakePlayer.isInsideRadius(c, radius, true, false))
 		    .collect(Collectors.toList());
 	    
-	    // Προτεραιότητα: mobs που σε στοχεύουν
 	    for (Creature npc : nearby)
 	    {
 	        if (!npc.isDead() && npc.getTarget() == _ffffakePlayer)
@@ -147,7 +132,6 @@ public abstract class FFFFakePlayerAI
 	        }
 	    }
 
-	    // Αλλιώς, random στόχος
 	    List<Creature> valid = nearby.stream()
 	        .filter(x -> !x.isDead())
 	        .collect(Collectors.toList());
@@ -212,10 +196,22 @@ public abstract class FFFFakePlayerAI
 	}
 	
 	protected void toVillageOnDeath() {
-		if (_ffffakePlayer.isDead())
-			_ffffakePlayer.doRevive();
+		System.out.println("[Bot DEBUG] Died at: " + _ffffakePlayer.getX() + ", " + _ffffakePlayer.getY() + ", " + _ffffakePlayer.getZ());	
 		
-		_ffffakePlayer.getFFFFakeAi().teleportToLocation(83478, 148173, -3408, 400);
+	    _ffffakePlayer.doRevive();
+	    System.out.println("[Bot DEBUG] Revived.");
+
+	        final int x = _ffffakePlayer.getX();
+	        final int y = _ffffakePlayer.getY();
+	        final int z = _ffffakePlayer.getZ();
+
+	            int geoZ = GeoEngine.getInstance().getHeight(x, y, z);
+	            System.out.println("[Bot DEBUG] GeoZ: " + geoZ + " | OriginalZ: " + z);
+
+	                _ffffakePlayer.getFFFFakeAi().teleportToLocation(x, y, geoZ + 50, 300);
+	                System.out.println("[Bot DEBUG] Teleporting to: " + x + ", " + y + ", " + (geoZ + 50));
+    
+	        _ffffakePlayer.getFFFFakeAi().teleportToLocation(x, y, geoZ + 50, 300);
 	}
 	
 	protected void clientStopMoving(SpawnLocation loc)
@@ -404,5 +400,8 @@ public abstract class FFFFakePlayerAI
 	}	
 	
 	public abstract void thinkAndAct(); 
+
+	public void handleDeath() {
+	}
 	protected abstract int[][] getBuffs();
 }

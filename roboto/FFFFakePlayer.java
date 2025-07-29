@@ -695,7 +695,27 @@ public class FFFFakePlayer extends Player
 	    setCurrentCp(getMaxCp());
 	    setCurrentHp(getMaxHp());
 	    setCurrentMp(getMaxMp());
-	}   
+	} 
+	
+	@Override
+	public boolean doDie(Creature killer) {
+	    if (!super.doDie(killer))
+	        return false;
+
+	    setFakeDeathRespawn(true);
+
+	    if (getFFFFakeAi() != null) {
+	        try {
+	            getFFFFakeAi().handleDeath();
+	        } catch (Exception e) {
+	            System.out.println("[ERROR] handleDeath() exception: " + e.getMessage());
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return true;
+	}
+
 	public boolean isSameClanOrAlliance(Player other) {
 	    if (other == null) return false;
 	    if (getClanId() > 0 && getClanId() == other.getClanId()) return true;
